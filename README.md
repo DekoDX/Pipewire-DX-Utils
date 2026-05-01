@@ -10,7 +10,7 @@ Run either `systemctl --user enable --now filter-chain.service` or `systemctl --
 Dinit+Turnstile users might have a filter-chain user service but I can not guarantee this.
 
 # Setup
-replace `sofa-path` with a sofa file of your choosing. You can download many of them from https://kutt.it/BinauralHRTF. A good baseline is EAC_Default.
+replace `sofa-path` with a sofa file of your choosing. You can download many of them from https://kutt.to/BinauralHRTF. A good baseline is EAC_Default.
 If you use the Equalizer Sink be sure to replace `eq-path` with your convulution eq. If you don't already have one, it can be obtained from https://autoeq.app or https://peqdb.com/
 
 If you decide to use the primary noise cancelling sink you either need to get the ladspa from https://codeberg.org/khip/khip and update the ladspa path or use the aur package `khip`
