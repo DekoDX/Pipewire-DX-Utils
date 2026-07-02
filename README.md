@@ -1,37 +1,42 @@
 # Pipewire-Utils-DX
-A tunable configuration file example for a virtual 7.1.4 surround sound setup on linux.
-Windows Games with dolby atmos through proton should output vertical channels(Tested with Helldivers 2).
-This repo also provides a convolution eq sink and a noise cancelling sink powered by Khip.
+## These configuration files will not work on your system without changing some values
+These are my Pipewire dotfiles which I found useful enough to share.
+Only use the echo cancellation sink if you have speakers or open back headphones.
+
+If you want a gui or want the hesuvi `.wav` virtual surround format instead you should use [EasyEffects](https://github.com/wwmm/easyeffects) and [virtual-surround-manager](https://github.com/Berny23/virtual-surround-manager)
 
 # Requirements
 Fedora users specifically need the `pipewire-module-filter-chain-sofa` package for this to function.
-Systemd users should have the filter-chain.service user service enabled after properly setting this up.
-Run either `systemctl --user enable --now filter-chain.service` or `systemctl --global enable filter-chain.service # Enable filter-chain support for all users` to enable this.
-Dinit+Turnstile users might have a filter-chain user service but I can not guarantee this.
+If you are using the files in `filter-chain.conf.d` start/enable the `filter-chain.service` user service
 
 # Setup
-replace `sofa-path` with a sofa file of your choosing. You can download many of them from https://kutt.to/BinauralHRTF. A good baseline is EAC_Default.
-If you use the Equalizer Sink be sure to replace `eq-path` with your convulution eq. If you don't already have one, it can be obtained from https://autoeq.app or https://peqdb.com/
+You should change `node.target` in the files.
+You can list devices with `wpctl status` and get the `node.target` value with `wpctl status <device number>`.
 
-If you decide to use the primary noise cancelling sink you either need to get the ladspa from https://codeberg.org/khip/khip and update the ladspa path or use the aur package `khip`
-A tuneable noise cancelling sink using noise-suppression-for-voice is also provided. Requires a valid `noise-suppression-for-voice` package. Arch Linux has it in their repos and Fedora Linux users can grab it from the [Audinux Copr Repository](https://audinux.github.io/) as `ladspa-noise-suppression-for-voice`
+## Filter Chains
+### eq.conf
+Replace the eq-path with a supported `.wav` file. My recommended source for these is https://autoeq.app
+### surround-*.conf
+Replace the paths in the virtual surround files with a `.sofa` file. My recommended source for these is [here](https://airtable.com/appayGNkn3nSuXkaz/shruimhjdSakUPg2m).
+Quirks:
+- Fedora requires `pipewire-modules-filter-chain-sofa` to be installed with dnf
+- Other distributions should have pipewire built with libmysofa.
+- Ubuntu does not build pipewire with libmysofa
+- Gentoo does not have a `sofa` use flag. This should be able to be contributed easily.
+### nc.conf
+Remove the node.target value if not using `ec.conf`.
+Requires [noise-cancellation-for-voice](https://github.com/werman/noise-suppression-for-voice/releases)
+Packages:
+- Arch Linux: `noise-suppression-for-voice`
+- Fedora: `ladspa-noise-suppression-for-voice` from [Audinux](https://copr.fedorainfracloud.org/coprs/ycollet/audinux).
+- Distributions that do not package should download the ladspa and point the configuration to it.
+### ec.conf
+Only required if you have speakers or headphones that leak out audio.
+The 2 `node.target` values should be adjusted to your microphone and headphones/speakers.
 
-I personally recommend placing them in `/home/$USER/.local/share/pipewire/eq/`, `/home/$USER/.local/share/pipewire/hrir/` and `/home/$USER/.ladspa/`.
-Move the files to `~/.config/pipewire/filter-chain.conf.d/`.
-You should then run `systemctl --user enable --now filter-chain.service` or `sudo systemctl --global enable filter-chain.service # You may need to log out and log back in after running these`.
-Those without systemd must either autostart `/usr/bin/pipewire -c filter-chain.conf` after pipewire is started or write a userspace filter-chain service for their distribution calling that command that depends on your pipewire service.
-You can reload the configuration files by either running `systemctl --user restart filter-chain.service` or `/usr/bin/pipewire -c filter-chain.conf`.
-After this is all done you should make sure that the sinks are pointed to the right devices with pavucontrol or pavucontrol-qt. You should optionally make sure your virtual surround sink outputs to the equalizer sink.
-
-If you enable the eq sink, you should ensure the virtual surround sink is outputting to that and not vice versa.
-
-# Special Thanks
-[3DJ](https://github.com/ThreeDeeJay) for providing contributions to the 3d audio space and an excellent amount of resources for 3D Audio enthusiasts.
-
-https://codeberg.org/khip/khip for providing the primary noise cancellation ladspa.
-
-https://github.com/werman/noise-suppression-for-voice for providing the alternative noise cancellation ladspa
-
-Razer for inspiring me to upgrade my virtual surround sink to match and exceed the capabilities of some new software for one of their headsets.
-
-[The Binaural Audio Discord](https://discord.gg/B4n97X7dG4) by 3DJ for more inspiration. Feel free to ask me any questions there in regards to this and I'll answer them to the best of my ability.
+## Other
+### pipewire.conf.d/allowed-rates.conf
+You should change `default.clock.allowed-rates` to the rates your dac supports. You can list supported formats with `cat /proc/asound/card*/stream0`.
+`default.clock.rate` shouldn't need changed as pipewire will change sample rates as needed.
+Remove the quantum values if you face issues. These won't work for everyone and simply reduce latency on capable hardware.
+### The rest should need no changes, are optional, or are described in the files.
